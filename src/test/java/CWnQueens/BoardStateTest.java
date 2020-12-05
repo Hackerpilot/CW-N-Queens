@@ -13,7 +13,7 @@ class BoardStateTest {
                     assert b.available(row, col);
                 }
             }
-            b.take(0, 0);
+            b.placeQueen(0, 0);
             assert !b.available(0, 0);
             for (int a = 0; a < b.size; a++) {
                 assert !b.available(0, a);
@@ -23,7 +23,7 @@ class BoardStateTest {
         }
         {
             BoardState b = new BoardState(4);
-            b.take(2, 0);
+            b.placeQueen(2, 0);
             assert !b.available(1,1);
             assert !b.available(3,1);
         }
@@ -33,14 +33,16 @@ class BoardStateTest {
     void coLinearTest() {
         {
             BoardState b = new BoardState(5);
-            b.take(0, 0);
-            b.take(1, 2);
+            b.placeQueen(0, 0);
+            b.placeQueen(1, 2);
+            // Check that it rejects placing a queen in a line with two existing queens
             assert !b.available(2, 4);
         }
         {
             BoardState b = new BoardState(5);
-            b.take(0, 0);
-            b.take(2, 4);
+            b.placeQueen(0, 0);
+            b.placeQueen(2, 4);
+            // Check that it rejects placing a queen between two existing queens
             assert !b.available(1, 2);
         }
     }

@@ -1,6 +1,9 @@
 package CWnQueens;
 
-public final class Fractions {
+/**
+ * Functionality for normalizing line slopes
+ */
+public final class LineSlope {
 
     /**
      * Reduces a fraction
@@ -8,7 +11,7 @@ public final class Fractions {
      * @param y the denominator
      * @return the reduced fraction, as a pair, with x and y
      */
-    public static Pair reduce(final int x, final int y) {
+    public static Pair normalize(final int x, final int y) {
         final int d = gcd(Math.abs(x), Math.abs(y));
         return new Pair(x / d, y / d);
     }

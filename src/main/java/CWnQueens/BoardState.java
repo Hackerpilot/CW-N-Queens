@@ -55,7 +55,7 @@ public class BoardState implements Cloneable {
      * @param row the row
      * @param col the column
      */
-    public void take(final int row, final int col) {
+    public void placeQueen(final int row, final int col) {
         rowTaken[row] = true;
         colTaken[col] = true;
         ascendingTaken[diagonalUp(row, col)] = true;
@@ -69,7 +69,7 @@ public class BoardState implements Cloneable {
      * @param row the row
      * @param col the column
      */
-    public void untake(final int row, final int col) {
+    public void removeQueen(final int row, final int col) {
         rowTaken[row] = false;
         colTaken[col] = false;
         ascendingTaken[diagonalUp(row, col)] = false;
@@ -107,7 +107,7 @@ public class BoardState implements Cloneable {
         Pair base = new Pair(0, 0);
         for (final Pair p : queens) {
             // First get the slope between the test point and the current point
-            Pair slope = Fractions.reduce(p.x - col, p.y - row);
+            Pair slope = LineSlope.normalize(p.x - col, p.y - row);
             // Base our search from the point
             base.x = p.x;
             base.y = p.y;

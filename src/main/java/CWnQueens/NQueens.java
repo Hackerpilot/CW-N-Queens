@@ -1,7 +1,5 @@
 package CWnQueens;
 
-import CWnQueens.BoardState;
-
 import java.util.ArrayList;
 
 public class NQueens {
@@ -26,9 +24,9 @@ public class NQueens {
         }
         for (int col = 0; col < board.size; col++) {
             if (board.available(row, col)) {
-                board.take(row, col);
+                board.placeQueen(row, col);
                 solve(row + 1, board);
-                board.untake(row, col);
+                board.removeQueen(row, col);
             }
         }
     }
