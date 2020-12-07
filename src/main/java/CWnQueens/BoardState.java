@@ -29,8 +29,8 @@ final class BoardState {
             for (int c = 0; c < size; c++) {
                 if (storage[r * size + c] == 2)
                     System.out.print("Q");
-                else if (storage[r * size + c] == 1)
-                    System.out.print("X");
+//                else if (storage[r * size + c] == 1)
+//                    System.out.print("X");
                 else
                     System.out.print("*");
             }
