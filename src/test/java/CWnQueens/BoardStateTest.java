@@ -7,15 +7,16 @@ class BoardStateTest {
     @Test
     void available() {
         {
-            BoardState b = new BoardState(4);
-            for (int row = 0; row < b.size; row++) {
-                for (int col = 0; col < b.size; col++) {
+            final int s = 4;
+            BoardState b = new BoardState(s);
+            for (int row = 0; row < s; row++) {
+                for (int col = 0; col < s; col++) {
                     assert b.available(row, col);
                 }
             }
             b.placeQueen(0, 0);
             assert !b.available(0, 0);
-            for (int a = 0; a < b.size; a++) {
+            for (int a = 0; a < s; a++) {
                 assert !b.available(0, a);
                 assert !b.available(a, 0);
                 assert !b.available(a, a);

@@ -1,150 +1,115 @@
 package CWnQueens;
 
-import java.util.HashSet;
-
 /**
- * Board state for the modified N-Queens problem.
+ * Stores the board state for the problem.
  */
-public class BoardState implements Cloneable {
-
+final class BoardState {
     /**
-     * @param size = the width and height of the board.
+     * Construct a board state with the given size.
+     * @param size the width and height of the board.
      */
-    BoardState(int size) {
-        queens = new HashSet<>();
-        rowTaken = new boolean[size];
-        colTaken = new boolean[size];
-        descendingTaken = new boolean[size * 2 - 1];
-        ascendingTaken = new boolean[size * 2 - 1];
+    public BoardState(int size) {
+        this.storage = new byte[size * size];
         this.size = size;
     }
 
-    @Override
-    public Object clone() {
-        try {
-            BoardState b = (BoardState) super.clone();
-            b.queens = (HashSet<Pair>) queens.clone();
-            return b;
-        } catch (CloneNotSupportedException c) {
-            assert false;
-        }
-        return null;
+    /**
+     * Overwrites this board state with another.
+     * @param other the board state to duplicate.
+     */
+    public void makeCopyOf(BoardState other) {
+        System.arraycopy(other.storage, 0, this.storage, 0, other.storage.length);
     }
 
     /**
-     * Prints the board state to the console.
+     * Prints the board state to stdout.
      */
     public void print() {
-        Pair p = new Pair(0, 0);
-        for (int row = 0; row < size; row++) {
-            for (int col = 0; col < size; col++) {
-                p.x = col;
-                p.y = row;
-                if (queens.contains(p))
-                    System.out.print('Q');
+        for (int r = 0; r < size; r++) {
+            for (int c = 0; c < size; c++) {
+                if (storage[r * size + c] == 2)
+                    System.out.print("Q");
+                else if (storage[r * size + c] == 1)
+                    System.out.print("X");
                 else
-                    System.out.print('_');
+                    System.out.print("*");
             }
             System.out.println();
         }
     }
 
     /**
-     * Marks the give spot on the board as taken.
-     *
-     * @param row the row
-     * @param col the column
+     * Determine if a square is a valid location for a queen.
+     * @param col the column.
+     * @param row the row.
+     * @return true if the square is valid, false otherwise.
      */
-    public void placeQueen(final int row, final int col) {
-        rowTaken[row] = true;
-        colTaken[col] = true;
-        ascendingTaken[diagonalUp(row, col)] = true;
-        descendingTaken[diagonalDown(row, col)] = true;
-        queens.add(new Pair(col, row));
+    public boolean available(int col, int row) {
+        return storage[row * size + col] == 0;
     }
 
     /**
-     * Marks the give spot on the board as empty.
-     *
-     * @param row the row
-     * @param col the column
+     * Places a queen on the given spot, and marks other spots on the board as invalid placement locations.
+     * @param col the column.
+     * @param row the row.
      */
-    public void removeQueen(final int row, final int col) {
-        rowTaken[row] = false;
-        colTaken[col] = false;
-        ascendingTaken[diagonalUp(row, col)] = false;
-        descendingTaken[diagonalDown(row, col)] = false;
-        queens.remove(new Pair(col, row));
-    }
-
-    /**
-     * Determine if the give space on the board can have a queen placed on it
-     *
-     * @param row the row
-     * @param col the column
-     * @return true if the given space is available
-     */
-    public boolean available(final int row, final int col) {
-        return !rowTaken[row]
-                && !colTaken[col]
-                && !descendingTaken[diagonalDown(row, col)]
-                && !ascendingTaken[diagonalUp(row, col)]
-                && !coLinear(row, col);
-    }
-
-    // Translates a row,col pair into an array index
-    private int diagonalUp(final int row, final int col) {
-        return row + col;
-    }
-
-    // Translates a row,col pair into an array index
-    private int diagonalDown(final int row, final int col) {
-        return size + col - row - 1;
-    }
-
-    // Tests if the given point is co-linear with any two existing points
-    private boolean coLinear(final int row, final int col) {
-        Pair base = new Pair(0, 0);
-        for (final Pair p : queens) {
-            // First get the slope between the test point and the current point
-            Pair slope = LineSlope.normalize(p.x - col, p.y - row);
-            // Base our search from the point
-            base.x = p.x;
-            base.y = p.y;
-            // Search along the line to see if we find another queen before
-            // running off the end of the board.
-            while (true) {
-                base.x += slope.x;
-                base.y += slope.y;
-                if (base.x < 0 || base.x >= size || base.y < 0 || base.y >= size)
-                    break;
-                if (queens.contains(base))
-                    return true;
-            }
-            base.x = col;
-            base.y = row;
-            while (true) {
-                base.x -= slope.x;
-                base.y -= slope.y;
-                if (base.x < 0 || base.x >= size || base.y < 0 || base.y >= size)
-                    break;
-                if (queens.contains(base))
-                    return true;
+    public void placeQueen(int col, int row) {
+        for (int i = 0; i < size; i++) {
+            // Mark the row invalid
+            storage[i * size + col] = (byte) 1;
+            // Mark the column invalid
+            storage[row * size + i] = (byte) 1;
+            // Mark diagonals invalid
+            setBits(col + i, row + i, (byte) 1);
+            setBits(col + i, row - i, (byte) 1);
+            setBits(col - i, row + i, (byte) 1);
+            setBits(col - i, row - i, (byte) 1);
+        }
+        int[] base = {0, 0};
+        // Mark cells invalid when they are in a line with existing queens and the new queen.
+        for (int r = 0; r < size; r++) {
+            for (int c = 0; c < size; c++) {
+                // Skip this square if there's no queen here.
+                if (storage[r * size + c] != 2)
+                    continue;
+                // Treat 1/2, 2/4, 3/6 slopes as the same by reducing them.
+                int[] slope = LineSlope.normalize(c - col, r - row);
+                // Base our search from the square where the other queen is located.
+                base[0] = col;
+                base[1] = row;
+                // Search along the line to see if we find another queen before
+                // running off the end of the board.
+                while (true) {
+                    base[0] += slope[0];
+                    base[1] += slope[1];
+                    if (!setBits(base[0], base[1], (byte) 1))
+                        break;
+                }
+                // Start over at the new queen's location and look in the other direction.
+                base[0] = col;
+                base[1] = row;
+                while (true) {
+                    base[0] -= slope[0];
+                    base[1] -= slope[1];
+                    if (!setBits(base[0], base[1], (byte) 1))
+                        break;
+                }
             }
         }
-        return false;
+        // Mark the queen's location.
+        storage[row * size + col] = (byte) 2;
     }
 
-    // Both the width and height of the board
-    public final int size;
-    // Positions of the queens on the board
-    private HashSet<Pair> queens;
-    // Is a row taken
-    private final boolean[] rowTaken;
-    // Is a column taken
-    private final boolean[] colTaken;
-    // top-left to bottom-right
-    private final boolean[] descendingTaken;
-    // bottom-left to top-right
-    private final boolean[] ascendingTaken;
+    // Sets the storage value for the given location and returns true, or does nothing if the location is invalid and
+    // returns false.
+    private boolean setBits(int col, int row, byte bits) {
+        if (col < 0 || col >= size || row < 0 || row >= size)
+            return false;
+        if (storage[row * size + col] == 0)
+            storage[row * size + col] = bits;
+        return true;
+    }
+
+    private final int size;
+    private final byte[] storage;
 }
