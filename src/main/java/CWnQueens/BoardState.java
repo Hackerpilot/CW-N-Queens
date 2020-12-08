@@ -73,8 +73,7 @@ final class BoardState {
                     continue;
                 // Treat 1/2, 2/4, 3/6 slopes as the same by reducing them.
                 int[] slope = LineSlope.normalize(c - col, r - row);
-                // Search along the line to see if we find another queen before
-                // running off the end of the board.
+                // Mark spaces along the line in both directions until we run off the end of the board.
                 for (int i = 1; true; i++) {
                     final boolean b = setBits(c - (slope[0] * i), r - (slope[1] * i), (byte) 1);
                     final boolean a = setBits(c + (slope[0] * i), r + (slope[1] * i), (byte) 1);
