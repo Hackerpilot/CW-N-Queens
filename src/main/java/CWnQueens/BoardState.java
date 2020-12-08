@@ -65,7 +65,6 @@ final class BoardState {
             setBits(col - i, row + i, (byte) 1);
             setBits(col - i, row - i, (byte) 1);
         }
-        int[] base = {0, 0};
         // Mark cells invalid when they are in a line with existing queens and the new queen.
         for (int r = 0; r < size; r++) {
             for (int c = 0; c < size; c++) {
@@ -74,24 +73,12 @@ final class BoardState {
                     continue;
                 // Treat 1/2, 2/4, 3/6 slopes as the same by reducing them.
                 int[] slope = LineSlope.normalize(c - col, r - row);
-                // Base our search from the square where the other queen is located.
-                base[0] = col;
-                base[1] = row;
                 // Search along the line to see if we find another queen before
                 // running off the end of the board.
-                while (true) {
-                    base[0] += slope[0];
-                    base[1] += slope[1];
-                    if (!setBits(base[0], base[1], (byte) 1))
-                        break;
-                }
-                // Start over at the new queen's location and look in the other direction.
-                base[0] = col;
-                base[1] = row;
-                while (true) {
-                    base[0] -= slope[0];
-                    base[1] -= slope[1];
-                    if (!setBits(base[0], base[1], (byte) 1))
+                for (int i = 1; true; i++) {
+                    final boolean b = setBits(c - (slope[0] * i), r - (slope[1] * i), (byte) 1);
+                    final boolean a = setBits(c + (slope[0] * i), r + (slope[1] * i), (byte) 1);
+                    if (!a && !b)
                         break;
                 }
             }
